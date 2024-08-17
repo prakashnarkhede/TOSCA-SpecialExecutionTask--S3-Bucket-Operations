@@ -9,9 +9,9 @@ using Tricentis.Automation.Creation.Attributes;
 [assembly: AssemblyTitle("S3Operations")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Wolters Kluwer")]
+[assembly: AssemblyCompany("xyz")]
 [assembly: AssemblyProduct("S3Operations")]
-[assembly: AssemblyCopyright("Copyright © Wolters Kluwer 2024")]
+[assembly: AssemblyCopyright("Copyright © xyz")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
