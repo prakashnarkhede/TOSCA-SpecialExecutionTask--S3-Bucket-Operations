@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using Amazon;
-using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
-using Amazon.Runtime.Internal;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
@@ -15,6 +12,9 @@ using Tricentis.Automation.Creation;
 using Tricentis.Automation.Engines;
 using Tricentis.Automation.AutomationInstructions.TestActions;
 using Tricentis.Automation.AutomationInstructions.Dynamic.Values;
+using Tricentis.Automation.AutomationInstructions.Configuration;
+using Tricentis.Automation.Execution.Recovery;
+using Tricentis.Automation.Execution.Results;
 
 namespace S3Operations
 {
@@ -107,17 +107,14 @@ namespace S3Operations
                         Task<ActionResult> task1 = DownloadFileAsync(s3Client, bucketName, s3Key, LocalFilePath);
                         return task1.Result;
                     case "List Files":
-                        ListFilesAsync(s3Client, bucketName).Wait();
-                        return new PassedActionResult("Files listed successfully.\n" + GetLogs());
+                        Task<ActionResult> task2 = ListFilesAsync(s3Client, bucketName, testAction);
+                        return task2.Result;
                     case "Delete File":
                         DeleteFileAsync(s3Client, bucketName, key).Wait();
                         return new PassedActionResult("File deleted successfully.\n" + GetLogs());
                     case "Check File Exists":
                         FileExistsAsync(s3Client, bucketName, key).Wait();
                         return new PassedActionResult("File existence check completed.\n" + GetLogs());
-                    case "Generate Pre-Signed URL":
-                        GeneratePreSignedURL(s3Client, bucketName, key).Wait();
-                        return new PassedActionResult("Pre-signed URL generated successfully.\n" + GetLogs());
                     default:
                         Log("Invalid operation specified.");
                         return new UnknownFailedActionResult("File Read Completed. All Respective actions completed..");
@@ -176,36 +173,62 @@ namespace S3Operations
         }
 
 
-        private async Task ListFilesAsync(IAmazonS3 s3Client, string bucketName)
+        private async Task<ActionResult> ListFilesAsync(IAmazonS3 s3Client, string bucketName, ISpecialExecutionTaskTestAction testAction)
         {
             try
             {
                 Log($"Starting file listing in S3 bucket: {bucketName}");
                 var request = new ListObjectsRequest { BucketName = bucketName };
                 var response = await s3Client.ListObjectsAsync(request);
-
+                string filesList;
                 if (response.S3Objects.Count > 0)
                 {
                     Log("Files found in the bucket:");
+                    List<string> files = new List<string>();
                     foreach (S3Object entry in response.S3Objects)
                     {
-                        Log($" - {entry.Key} (size: {entry.Size} bytes)");
+                        string fileInfo = $"{entry.Key} (size: {entry.Size} bytes)";
+                        files.Add(fileInfo);
+                        Log($" - {fileInfo}");
                     }
+                    filesList = string.Join("; ", files);
                 }
                 else
                 {
                     Log("No files found in the bucket.");
+                    filesList = $"No Files Available at given location - s3://{bucketName}/";
                 }
 
                 Log("File listing completed successfully.");
+
+                // Store the result in the logs or return it as part of the ActionResult if needed
+                Log($"Files List: {filesList}");
+                IParameter outputParm = testAction.GetParameter("Output", true);
+                if (outputParm.ActionMode == ActionMode.Buffer)
+                {
+                    IInputValue inputValue = outputParm.GetAsInputValue();
+                    Buffers.Instance.SetBuffer(outputParm.Name, inputValue.Value, false);
+                    testAction.SetResultForParameter(outputParm, SpecialExecutionTaskResultState.Ok, string.Format("Buffer {0} set to value {1}.", outputParm.Name, inputValue.Value));
+                }
+                //Otherwise we let TBox handle the verification. Other ActionModes like WaitOn will lead to an exception.
+                else
+                {
+                    //Don't need the return value of HandleActualValue in this case.
+                    HandleActualValue(testAction, outputParm, Buffers.Instance.GetBuffer(outputParm.Name));
+                }
+
+                return new PassedActionResult($"File listing completed successfully.\nFiles List: {filesList}\n" + GetLogs());
             }
             catch (AmazonS3Exception e)
             {
                 Log($"AWS S3 error during file listing: {e.Message}");
+                return new UnknownFailedActionResult($"AWS S3 error during file listing: {e.Message}\n" + GetLogs());
             }
             catch (Exception e)
             {
                 Log($"General error during file listing: {e.Message}");
+                return new UnknownFailedActionResult($"General error during file listing: {e.Message}\n" + GetLogs());
+
             }
         }
 
@@ -247,29 +270,6 @@ namespace S3Operations
             }
         }
 
-        private async Task GeneratePreSignedURL(IAmazonS3 s3Client, string bucketName, string key)
-        {
-            try
-            {
-                Log($"Generating pre-signed URL for file with key: {key} in S3 bucket: {bucketName}");
-                var request = new GetPreSignedUrlRequest
-                {
-                    BucketName = bucketName,
-                    Key = key,
-                    Expires = DateTime.UtcNow.AddMinutes(10)
-                };
-                string url = s3Client.GetPreSignedURL(request);
-                Log($"Pre-Signed URL: {url}");
-            }
-            catch (AmazonS3Exception e)
-            {
-                Log($"AWS S3 error during pre-signed URL generation: {e.Message}");
-            }
-            catch (Exception e)
-            {
-                Log($"General error during pre-signed URL generation: {e.Message}");
-            }
-        }
 
         private void Log(string message)
         {
