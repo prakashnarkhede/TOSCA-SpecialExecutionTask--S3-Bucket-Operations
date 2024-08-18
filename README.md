@@ -14,7 +14,7 @@ The "S3 Bucket Operations" module (Special Execution Task/SET) for Tosca is to f
 
 
 **How to use this SET/Module ?**
-  1. Download the attached zip file, Unzip  (Download link: )
+  1. Download the attached zip file, Unzip   (**Download link:**  _https://github.com/prakashnarkhede/TOSCA-SpecialExecutionTask--S3-Bucket-Operations/blob/master/S3%20Bucket%20Operations%20(TOSCA-%20Special%20Execution%20Task).zip_)
   2. copy all the dll and xml files to TBOX folder (ex - C:\Program Files (x86)\TRICENTIS\Tosca Testsuite\TBox )
   3. Import the module from .tsu file
   4. Enter necessary information in the test steps
