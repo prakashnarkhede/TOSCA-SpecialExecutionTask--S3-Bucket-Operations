@@ -12,6 +12,12 @@ The "S3 Bucket Operations" module (Special Execution Task/SET) for Tosca is to f
 
 **Check File Exists:** Checks whether a specific file exists in the S3 bucket. This operation is vital for verifying that a file is available before attempting to download or manipulate it.
 
+**Technical Details:**
+The code in this repo / SET dll, is created on
+  - .Net SDK Version 8.0
+  - .Net Framework 4.8
+  - Visual Studio 22
+  - Windows
 
 **How to use this SET/Module ?**
   1. Download the attached zip file, Unzip   (**Download link:**  _https://github.com/prakashnarkhede/TOSCA-SpecialExecutionTask--S3-Bucket-Operations/blob/master/S3%20Bucket%20Operations%20(TOSCA-%20Special%20Execution%20Task).zip_)
