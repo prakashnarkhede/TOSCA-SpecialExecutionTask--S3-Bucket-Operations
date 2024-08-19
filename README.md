@@ -22,14 +22,15 @@ The code in this repo / SET dll, is created on
 **How to use this SET/Module ?**
   1. Download the attached zip file, Unzip   (**Download link:**  _https://github.com/prakashnarkhede/TOSCA-SpecialExecutionTask--S3-Bucket-Operations/blob/master/S3%20Bucket%20Operations%20(TOSCA-%20Special%20Execution%20Task).zip_)
   2. copy all the dll and xml files to TBOX folder (ex - C:\Program Files (x86)\TRICENTIS\Tosca Testsuite\TBox )
-  3. Import the module from .tsu file
-  4. Enter necessary information in the test steps
+  3. Restart TOSCA Commander
+  4. Import the module from .tsu file
+  5. Enter necessary information in the test steps
      
-      ** a. **Set the S3Bucket_Name, S3Bucket_Region, S3Bucket_AccessKey, and S3Bucket_SecretAccess parameters with appropriate values.
+      ** a. ** Set the S3Bucket_Name, S3Bucket_Region, S3Bucket_AccessKey, and S3Bucket_SecretAccess parameters with appropriate values.
 
-      ** b. **Specify the Operation parameter as required. Supported operations with this SET are - Upload File, Download File, List Files, Delete File and check if file exists.
+      ** b. ** Specify the Operation parameter as required. Supported operations with this SET are - Upload File, Download File, List Files, Delete File and check if file exists.
 
-     **  c.** module attribute output to be used to buffer file lists in case of List Files Operation, and Check if file exists, it return true or false.
+     **  c. ** module attribute output to be used to buffer file lists in case of List Files Operation, and Check if file exists, it return true or false.
 
 **Module (xModule/Special Execution Task):**
 
