@@ -24,9 +24,12 @@ The code in this repo / SET dll, is created on
   2. copy all the dll and xml files to TBOX folder (ex - C:\Program Files (x86)\TRICENTIS\Tosca Testsuite\TBox )
   3. Import the module from .tsu file
   4. Enter necessary information in the test steps
-       a. Set the S3Bucket_Name, S3Bucket_Region, S3Bucket_AccessKey, and S3Bucket_SecretAccess parameters with appropriate values.
-       b. Specify the Operation parameter as required. Supported operations with this SET are - Upload File, Download File, List Files, Delete File and check if file exists.
-       c. module attribute output to be used to buffer file lists in case of List Files Operation, and Check if file exists, it return true or false.
+     
+      ** a. **Set the S3Bucket_Name, S3Bucket_Region, S3Bucket_AccessKey, and S3Bucket_SecretAccess parameters with appropriate values.
+
+      ** b. **Specify the Operation parameter as required. Supported operations with this SET are - Upload File, Download File, List Files, Delete File and check if file exists.
+
+     **  c.** module attribute output to be used to buffer file lists in case of List Files Operation, and Check if file exists, it return true or false.
 
 **Module (xModule/Special Execution Task):**
 
