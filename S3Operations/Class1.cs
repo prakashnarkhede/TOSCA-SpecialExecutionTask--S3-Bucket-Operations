@@ -17,7 +17,7 @@ using Tricentis.Automation.Execution.Results;
 
 namespace S3Operations
 {
-    [SpecialExecutionTaskName("S3_Bucket_Operations1")]
+    [SpecialExecutionTaskName("S3_Bucket_Operations")]
     class S3_Bucket_Operations_Engine : SpecialExecutionTask
     {
         private readonly List<string> _logs = new List<string>(); // List to store logs
@@ -83,14 +83,14 @@ namespace S3Operations
                         Task<ActionResult> task = UploadFileAsync(s3Client, bucketName, testAction);
                         return task.Result;
                     case "Download File":
-                      //  Task<ActionResult> task1 = DownloadFileAsync(s3Client, bucketName, testAction);
-                       // return task1.Result;
+                        Task<ActionResult> task1 = DownloadFileAsync(s3Client, bucketName, testAction);
+                        return task1.Result;
                     case "List Files":
                         Task<ActionResult> task2 = ListFilesAsync(s3Client, bucketName, testAction);
                         return task2.Result;
                     case "Delete File":
-                      //  DeleteFileAsync(s3Client, bucketName, testAction).Wait();
-                       // return new PassedActionResult("File deleted successfully.\n" + GetLogs());
+                        Task<ActionResult> taskDeleteFile = DeleteFileAsync(s3Client, bucketName, testAction);
+                        return taskDeleteFile.Result;
                     case "Check File Exists":
                         Task<ActionResult> taskCheckIfExist = FileExistsAsync(s3Client, bucketName, testAction);
                         return taskCheckIfExist.Result;
@@ -153,25 +153,50 @@ namespace S3Operations
         }
 
 
-        private async Task<ActionResult> DownloadFileAsync(IAmazonS3 s3Client, string bucketName, string key, string destinationPath)
+        private async Task<ActionResult> DownloadFileAsync(IAmazonS3 s3Client, string bucketName, ISpecialExecutionTaskTestAction testAction)
         {
+            string localFilePath;
+            string s3Key = String.Empty;
+
             try
             {
-                Log($"Starting download of file from S3 bucket: {bucketName} with key: {key} to local path: {destinationPath}");
+                IInputValue IlocalFilePath = testAction.GetParameterAsInputValue("LocalFilePath", true);
+                IInputValue IlocalFileName = testAction.GetParameterAsInputValue("LocalFileName", true);
+                IInputValue Is3_FilePath = testAction.GetParameterAsInputValue("S3_FilePath", true);
+                IInputValue Is3_FileName = testAction.GetParameterAsInputValue("S3_FileName", true);
+
+                if (IlocalFilePath == null) Log("Local File Path parameter is missing.");
+                if (IlocalFileName == null) Log("Local File Name parameter is missing.");
+                if (Is3_FilePath == null) Log("S3 File Path parameter is missing.");
+                if (Is3_FileName == null) Log("S3 File Name parameter is missing.");
+
+                if (IlocalFilePath == null || IlocalFileName == null || Is3_FilePath == null || Is3_FileName == null)
+                    return new UnknownFailedActionResult("One or more required operation parameters are missing for download file action, Local File Path, Local File Name, S3 file path and file name are mandatory for this action.");
+
+                string LocalFilePath = IlocalFilePath.Value;
+                string LocalFileName = IlocalFileName.Value;
+                string S3_FilePath = Is3_FilePath.Value;
+                string S3_FileName = Is3_FileName.Value;
+                string Output = String.Empty; //output variable is for returning the output data, to be utilized for buffering/verifying
+
+                localFilePath = Path.Combine(LocalFilePath, LocalFileName);
+                s3Key = $"{S3_FilePath}/{S3_FileName}";
+
+                Log($"Starting download of file from S3 bucket: {bucketName} with key: {s3Key} to local path: {localFilePath}");
                 var fileTransferUtility = new TransferUtility(s3Client);
-                await fileTransferUtility.DownloadAsync(destinationPath, bucketName, key);
+                await fileTransferUtility.DownloadAsync(localFilePath, bucketName, s3Key);
                 Log("Download completed successfully.");
-                return new PassedActionResult($"File downloaded successfully. Local Path: {destinationPath}\n" + GetLogs());
+                return new PassedActionResult($"File downloaded successfully. Local Path: {localFilePath}\n" + GetLogs());
             }
             catch (AmazonS3Exception e)
             {
                 Log($"AWS S3 error during download: {e.Message}");
-                return new UnknownFailedActionResult($"Error during download. S3 Path: {key}. Error: {e.Message}\n" + GetLogs());
+                return new UnknownFailedActionResult($"Error during download. S3 Path: {s3Key}. Error: {e.Message}\n" + GetLogs());
             }
             catch (Exception e)
             {
                 Log($"General error during download: {e.Message}");
-                return new UnknownFailedActionResult($"General error during download. S3 Path: {key}. Error: {e.Message}\n" + GetLogs());
+                return new UnknownFailedActionResult($"General error during download. S3 Path: {s3Key}. Error: {e.Message}\n" + GetLogs());
             }
         }
 
@@ -244,22 +269,46 @@ namespace S3Operations
             }
         }
 
-        private async Task DeleteFileAsync(IAmazonS3 s3Client, string bucketName, string key)
+        private async Task<ActionResult> DeleteFileAsync(IAmazonS3 s3Client, string bucketName, ISpecialExecutionTaskTestAction testAction)
         {
+            string S3_FilePath = String.Empty;
             try
             {
+                IInputValue Is3_FilePath = testAction.GetParameterAsInputValue("S3_FilePath", true);
+                IInputValue Is3_FileName = testAction.GetParameterAsInputValue("S3_FileName", true);
+
+                if (Is3_FilePath == null) Log("S3 File Path parameter is missing.");
+                if (Is3_FileName == null) Log("S3 File Name parameter is missing.");
+
+                if (Is3_FileName == null)
+                    return new UnknownFailedActionResult("One or more required operation parameters are missing for upload file action, file name are mandatory for this action.");
+                if (Is3_FilePath != null) {
+                     S3_FilePath = Is3_FilePath.Value;
+                }
+
+                String key = $"{S3_FilePath}/{Is3_FileName.Value}";
+
                 Log($"Starting deletion of file with key: {key} from S3 bucket: {bucketName}");
-                var deleteObjectRequest = new DeleteObjectRequest { BucketName = bucketName, Key = key };
+                var deleteObjectRequest = new DeleteObjectRequest
+                {
+                    BucketName = bucketName,
+                    Key = key
+                };
+
                 await s3Client.DeleteObjectAsync(deleteObjectRequest);
                 Log("File deletion completed successfully.");
+
+                return new PassedActionResult($"File with key '{key}' successfully deleted from bucket '{bucketName}'.\n" + GetLogs());
             }
             catch (AmazonS3Exception e)
             {
                 Log($"AWS S3 error during file deletion: {e.Message}");
+                return new UnknownFailedActionResult($"AWS S3 error during file deletion: {e.Message}\n" + GetLogs());
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Log($"General error during file deletion: {e.Message}");
+                Log($"General error during file deletion: {ex.Message}");
+                return new UnknownFailedActionResult($"General error during file deletion: {ex.Message}\n" + GetLogs());
             }
         }
 
