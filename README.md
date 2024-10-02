@@ -1,4 +1,4 @@
-The "S3 Bucket Operations" module (Special Execution Task/SET) for Tosca is to facilitate interactions with Amazon S3 bucket to perform common operations on S3 buckets directly within their automated test scripts. This module is implemented as a Special Execution Task (SET) and supports various operations such as uploading files, downloading files, listing files, deleting files, and checking the existence of files in an S3 bucket. It provides a flexible and robust way to automate S3 operations in test cases.
+The "S3 Bucket Operations" module (Special Execution Task/SET) for Tosca facilitates interactions with Amazon S3 buckets to perform common operations on S3 buckets directly within their automated test scripts. This module is implemented as a Special Execution Task (SET) and supports various operations such as uploading files, downloading files, listing files, deleting files, and checking the existence of files in an S3 bucket. It provides a flexible and robust way to automate S3 operations in test cases.
 
 **Key Functionalities:**
 
@@ -33,10 +33,20 @@ The code in this repo / SET dll, is created on
      **  c. ** module attribute output to be used to buffer file lists in case of List Files Operation, and Check if file exists, it return true or false.
 
 **Module (xModule/Special Execution Task):**
-
-![image](https://github.com/user-attachments/assets/c339f345-3416-463c-acf0-23651f763e4c)
+![image](https://github.com/user-attachments/assets/403281ab-f6a9-4627-8f1c-08bc0c1c0b90)
 
 **Test Case Example:**
+![image](https://github.com/user-attachments/assets/31579303-907c-4f81-99b3-f9faba0479a3)
 
-![image](https://github.com/user-attachments/assets/521d5b19-aa65-4f23-abbf-65c2e2875bcc)
+Refer to below youtube videos to understand the detailed implementation of the above SET
+
+Video#1. Automating AWS S3 Bucket Operations in Tricentis Tosca: Overview, Use Cases, and Demo
+https://www.youtube.com/watch?v=_ZL8KnHRKdI
+
+Video#2. AWS S3 Bucket Operations with  Tosca: Part1 (Setup - Visual Studio & Module Structure Guide)
+https://www.youtube.com/watch?v=-jFRMeIAK34
+
+Video#3. AWS S3 Bucket Operations with Tosca: Part2 (Detailed Implementation & Integration) 
+https://youtu.be/vfui-o2T904
+
 
