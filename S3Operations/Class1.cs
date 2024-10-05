@@ -15,6 +15,16 @@ using Tricentis.Automation.AutomationInstructions.Dynamic.Values;
 using Tricentis.Automation.AutomationInstructions.Configuration;
 using Tricentis.Automation.Execution.Results;
 
+/* 
+ * Author: Prakash Narkhede
+ * LinkedIn: https://www.linkedin.com/in/prakashnarkhede89/
+ * Email: prakash@automationtalks.com
+ * 
+ * The "S3 Bucket Operations" module (Special Execution Task/SET) for Tosca facilitates interactions with Amazon S3 buckets to perform common operations on S3 buckets directly within their automated test scripts.
+ * This module is implemented as a Special Execution Task (SET) and supports various operations such as uploading files, downloading files, listing files, deleting files, and checking the existence of files in an S3 bucket. 
+ * It provides a flexible and robust way to automate S3 operations in test cases.
+ */
+
 namespace S3Operations
 {
     [SpecialExecutionTaskName("S3_Bucket_Operations")]
